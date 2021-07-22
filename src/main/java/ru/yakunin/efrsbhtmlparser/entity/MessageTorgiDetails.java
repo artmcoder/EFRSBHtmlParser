@@ -111,4 +111,17 @@ public class MessageTorgiDetails {
     // we need an annotation @One-to-one here to the table MessageTorgi
     //uni-directional relations
 
+
+    @Override
+    public String toString() {
+        return "MessageTorgiDetails{" +
+                "lotNumber='" + lotNumber + '\'' +
+                ", lotDescription='" + lotDescription + '\'' +
+                ", startPrice='" + startPrice + '\'' +
+                ", step='" + step + '\'' +
+                ", deposit='" + deposit + '\'' +
+                ", priceDecreasingInfo='" + priceDecreasingInfo + '\'' +
+                ", lotClassification='" + lotClassification + '\'' +
+                '}';
+    }
 }

@@ -17,13 +17,14 @@ public class ArbitrManagerParser {
 
 
 
-    public static void main(String[] args) {
+    public void parserArbitrManagers(int startInFirstThread, int finishInFirstThread,
+                                     int startInSecondThread, int finishInSecondThread) {
         List<ArbitrManager> arbitrManagers = new ArrayList<>();
         ArbitrManagerParserThread arbitrManagerParserThread1 =
-                new ArbitrManagerParserThread(0, 10);
+                new ArbitrManagerParserThread(startInFirstThread, finishInFirstThread);
         ArbitrManagerParserThread arbitrManagerParserThread2 =
-                new ArbitrManagerParserThread(10
-                        , 20);
+                new ArbitrManagerParserThread(startInSecondThread
+                        , finishInSecondThread);
         arbitrManagerParserThread1.start();
         arbitrManagerParserThread2.start();
         try {

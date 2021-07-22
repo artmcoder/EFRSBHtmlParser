@@ -354,14 +354,26 @@ public class ArbitrManagerParserThread extends Thread {
                             MessageTorgiDetails messageTorgiDetails = new MessageTorgiDetails();
                             Element row = rows.get(j);
                             Elements cols = row.select("td");
-                            System.out.print(cols.get(0).text());
-                            System.out.print(cols.get(1).text());
-                            System.out.print(cols.get(2).text());
-                            System.out.print(cols.get(3).text());
-                            System.out.print(cols.get(4).text());
-                            System.out.print(cols.get(5).text());
-                            System.out.print(cols.get(6).text());
-                            System.out.println();
+                            String lotNumber = cols.get(0).text();
+                            if (isNumber(lotNumber)) {
+                                messageTorgiDetails.setLotNumber(lotNumber);
+                            } else {
+                                log.error("Value: {} is not be a number", lotNumber);
+                            }
+                            messageTorgiDetails.setLotDescription(cols.get(1).text());
+                            messageTorgiDetails.setStartPrice(cols.get(2).text());
+                            messageTorgiDetails.setStep(cols.get(3).text());
+                            messageTorgiDetails.setDeposit(cols.get(4).text());
+                            try {
+                                cols.get(6).text();
+                            } catch (IndexOutOfBoundsException e) {
+                                messageTorgiDetails.setLotClassification(cols.get(5).text());
+                            }
+                            if (messageTorgiDetails.getLotClassification() == null) {
+                                messageTorgiDetails.setLotClassification(cols.get(6).text());
+                                messageTorgiDetails.setPriceDecreasingInfo(cols.get(5).text());
+                            }
+                            messageTorgi.addMessageTorgiDetailsToMessageTorgi(messageTorgiDetails);
                         }
                         arbitrManager.addMessageTorgiToArbitrManager(messageTorgi);
                         break;
@@ -375,6 +387,7 @@ public class ArbitrManagerParserThread extends Thread {
                         break;
                 }
             }
+            arbitrManager.setMessagesQuantity(arbitrManager.getMessageTorgis().size());
             arbitrManagers.add(arbitrManager);
         }
         System.out.println(" finish his work in " + (System.currentTimeMillis() - start));
@@ -391,7 +404,17 @@ public class ArbitrManagerParserThread extends Thread {
         return payload;
     }
 
+    public boolean isNumber(String s) {
+        try {
+            int someInt = Integer.parseInt(String.valueOf(s));
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
+    }
+
     public List<ArbitrManager> getArbitrManagers() {
         return arbitrManagers;
     }
+
 }

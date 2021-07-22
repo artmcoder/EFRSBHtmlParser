@@ -480,6 +480,7 @@ public class MessageTorgi {
                 ", dateTimeAuction='" + dateTimeAuction + '\'' +
                 ", priceOfferForm='" + priceOfferForm + '\'' +
                 ", marketPlace='" + marketPlace + '\'' +
+                ", messageTorgiDetails=" + messageTorgiDetails +
                 ", detailsLink='" + detailsLink + '\'' +
                 '}';
     }

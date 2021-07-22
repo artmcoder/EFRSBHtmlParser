@@ -407,7 +407,7 @@ public class ArbitrManagerService {
                         .get(random.nextInt(lotClassifications.size())));
 
 
-                messageTorgi.setMessageTorgiDetails(messageTorgiDetails);
+//                messageTorgi.setMessageTorgiDetails(messageTorgiDetails);
                 arbitrManager.addMessageTorgiToArbitrManager(messageTorgi);
                 log.info("Added new Message torgi to Arbitr Manager");
             }

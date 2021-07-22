@@ -27,8 +27,8 @@ public class MessageTorgiController {
         model.addAttribute("town", town);
         model.addAttribute("region", region);
         model.addAttribute("searchByLotDesWord", searchByLotDesWord);
-        model.addAttribute("messages", messageTorgiService
-                .getAll(searchByLotDesWord, town, region));
+//        model.addAttribute("messages", messageTorgiService
+//                .getAll(searchByLotDesWord, town, region));
         model.addAttribute("towns", ControllerUtils.getAllTowns());
         model.addAttribute("regions", ControllerUtils.getAllRegions());
 
@@ -47,7 +47,7 @@ public class MessageTorgiController {
     @GetMapping("/arbitr/manager/{id}")
     public String arbitrManagerMessages(@PathVariable("id") ArbitrManager arbitrManager,
                                         Model model) {
-        model.addAttribute("messages", messageTorgiService.getMessagesByArbitrManager(arbitrManager));
+//        model.addAttribute("messages", messageTorgiService.getMessagesByArbitrManager(arbitrManager));
         return "messages";
     }
 
