@@ -351,6 +351,7 @@ public class ArbitrManagerParserThread extends Thread {
                         Elements rows = lotDetailsTable.select("tr");
 
                         for (int j = 1; j < rows.size(); j++) {
+                            MessageTorgiDetails messageTorgiDetails = new MessageTorgiDetails();
                             Element row = rows.get(j);
                             Elements cols = row.select("td");
                             System.out.print(cols.get(0).text());

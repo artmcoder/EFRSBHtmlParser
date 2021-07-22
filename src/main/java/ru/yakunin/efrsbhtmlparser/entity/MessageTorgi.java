@@ -35,9 +35,8 @@ public class MessageTorgi {
     private String marketPlace;
     @Column(columnDefinition = "text")
     private String publicationText;
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn
-    private MessageTorgiDetails messageTorgiDetails;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "messageTorgi")
+    private List<MessageTorgiDetails> messageTorgiDetails = new ArrayList<>();
     private String location;
     private String town;
     private String region;
@@ -196,6 +195,11 @@ public class MessageTorgi {
         return result;
     }
 
+    public void addMessageTorgiDetailsToMessageTorgi(MessageTorgiDetails msgTorgiDeetails) {
+        msgTorgiDeetails.setMessageTorgi(this);
+        messageTorgiDetails.add(msgTorgiDeetails);
+    }
+
     public String getDetailsLink() {
         return detailsLink;
     }
@@ -246,67 +250,67 @@ public class MessageTorgi {
     }
 
 
-    public String getRegionFromLotDescription() {
-        String regions[] = {
-                "Орловская область", "Орловская обл.",
-                "Ярославская область", "Вологодская обл.", "Кемеровская область"
-        };
+//    public String getRegionFromLotDescription() {
+//        String regions[] = {
+//                "Орловская область", "Орловская обл.",
+//                "Ярославская область", "Вологодская обл.", "Кемеровская область"
+//        };
+//
+//        String towns[] = {
+//                "Екатиринбург"
+//        };
+//
+//        for (int j = 0; j < regions.length; j++) {
+//            if (makeStringToLowerCase(messageTorgiDetails.getLotDescription())
+//                    .contains(makeStringToLowerCase(regions[j]))) {
+//                return regions[j];
+//            }
+//        }
+//        return null;
+//    }
 
-        String towns[] = {
-                "Екатиринбург"
-        };
-
-        for (int j = 0; j < regions.length; j++) {
-            if (makeStringToLowerCase(messageTorgiDetails.getLotDescription())
-                    .contains(makeStringToLowerCase(regions[j]))) {
-                return regions[j];
-            }
-        }
-        return null;
-    }
-
-    public String getLocationFromLotDes() {
-        String lotDes =
-                "квартира № 1 по адресу: Вологодская обл.," +
-                        " Шекснинский р-н., п. Шексна, ул. Труда, д. " +
-                        "35а; кадастровый № 35:23:0205019:595, площадь 19,8 кв. м.";
-        String regions[] = {
-                "Орловская область", "Орловская обл.",
-                "Ярославская область", "Вологодская обл.", "Кемеровская область"
-        };
-        String lotDescription = getMessageTorgiDetails().getLotDescription();
-        char[] lotDesChars = makeStringToLowerCase(lotDescription).toCharArray();
-        String location = "";
-        int numberOfSymbolToStartGetLocation = 0;
-        for (int i = 0; i < lotDesChars.length; i++) {
-            for (int j = 0; j < regions.length; j++) {
-                char[] regionChars = makeStringToLowerCase(regions[i]).toCharArray();
-                for (int k = 0; k < regionChars.length; k++) {
-                    if (lotDesChars[i] == regionChars[k]) {
-                        if (lotDesChars[i + 1] == regionChars[k + 1]) {
-                            if (lotDesChars[i + 2] == regionChars[k + 2]) {
-                                if (lotDesChars[i + 3] == regionChars[k + 3]) {
-                                    if (lotDesChars[i + 4] == regionChars[k + 4]) {
-                                        numberOfSymbolToStartGetLocation = i;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (numberOfSymbolToStartGetLocation != 0) {
-                try {
-                    int simpleCheckNumberFormatException = Integer.parseInt(String.valueOf(lotDesChars[i]));
-                    location += lotDesChars[i];
-                    break;
-                } catch (NumberFormatException e) {
-                    System.out.println("Cool everything!");
-                }
-            }
-        }
-        return location;
-    }
+//    public String getLocationFromLotDes() {
+//        String lotDes =
+//                "квартира № 1 по адресу: Вологодская обл.," +
+//                        " Шекснинский р-н., п. Шексна, ул. Труда, д. " +
+//                        "35а; кадастровый № 35:23:0205019:595, площадь 19,8 кв. м.";
+//        String regions[] = {
+//                "Орловская область", "Орловская обл.",
+//                "Ярославская область", "Вологодская обл.", "Кемеровская область"
+//        };
+//        String lotDescription = getMessageTorgiDetails().getLotDescription();
+//        char[] lotDesChars = makeStringToLowerCase(lotDescription).toCharArray();
+//        String location = "";
+//        int numberOfSymbolToStartGetLocation = 0;
+//        for (int i = 0; i < lotDesChars.length; i++) {
+//            for (int j = 0; j < regions.length; j++) {
+//                char[] regionChars = makeStringToLowerCase(regions[i]).toCharArray();
+//                for (int k = 0; k < regionChars.length; k++) {
+//                    if (lotDesChars[i] == regionChars[k]) {
+//                        if (lotDesChars[i + 1] == regionChars[k + 1]) {
+//                            if (lotDesChars[i + 2] == regionChars[k + 2]) {
+//                                if (lotDesChars[i + 3] == regionChars[k + 3]) {
+//                                    if (lotDesChars[i + 4] == regionChars[k + 4]) {
+//                                        numberOfSymbolToStartGetLocation = i;
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//            if (numberOfSymbolToStartGetLocation != 0) {
+//                try {
+//                    int simpleCheckNumberFormatException = Integer.parseInt(String.valueOf(lotDesChars[i]));
+//                    location += lotDesChars[i];
+//                    break;
+//                } catch (NumberFormatException e) {
+//                    System.out.println("Cool everything!");
+//                }
+//            }
+//        }
+//        return location;
+//    }
 
     public String getLocation() {
         return location;
@@ -444,11 +448,11 @@ public class MessageTorgi {
         this.publicationText = publicationText;
     }
 
-    public MessageTorgiDetails getMessageTorgiDetails() {
+    public List<MessageTorgiDetails> getMessageTorgiDetails() {
         return messageTorgiDetails;
     }
 
-    public void setMessageTorgiDetails(MessageTorgiDetails messageTorgiDetails) {
+    public void setMessageTorgiDetails(List<MessageTorgiDetails> messageTorgiDetails) {
         this.messageTorgiDetails = messageTorgiDetails;
     }
 

@@ -17,6 +17,9 @@ public class MessageTorgiDetails {
     @Column(columnDefinition = "text")
     private String priceDecreasingInfo;
     private String lotClassification;
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn
+    private MessageTorgi messageTorgi;
 
     public MessageTorgiDetails(String lotNumber, String lotDescription,
                                String startPrice, String step, String deposit,
@@ -95,6 +98,14 @@ public class MessageTorgiDetails {
 
     public void setLotClassification(String lotClassification) {
         this.lotClassification = lotClassification;
+    }
+
+    public MessageTorgi getMessageTorgi() {
+        return messageTorgi;
+    }
+
+    public void setMessageTorgi(MessageTorgi messageTorgi) {
+        this.messageTorgi = messageTorgi;
     }
 
     // we need an annotation @One-to-one here to the table MessageTorgi
