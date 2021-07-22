@@ -41,10 +41,11 @@ public class ArbitrManagerController {
         return "arbitr-manager-info";
     }
 
-//    @GetMapping("/a")
-//        public String arbitrManagerI() {
-//            arbitrManagerParser.parseAndSaveArbitrManagers();
-//            return "Hello";
-//    }
+    @GetMapping("/parseArbitrManagers")
+        public String arbitrManagerI() {
+            arbitrManagerParser.parserArbitrManagers(200, 210,
+                    210, 220);
+            return "Hello";
+    }
 
 }

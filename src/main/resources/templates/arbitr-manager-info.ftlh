@@ -7,6 +7,8 @@
     <p>Дата регистрации: <strong>${mng.regDate}</strong></p>
     <p>СРО: <strong>${mng.sro}</strong></p>
     <p>Количество сообщений: <strong>${mng.messagesQuantity}</strong></p>
+    <p>Информация с оригинального сайта: <strong><a target="_blank" href="${mng.arbitrManagersDetailsLink}">${mng.arbitrManagersDetailsLink}</a> </strong></p>
+
     <hr>
     <a href="/messages/arbitr/manager/${mng.id}">
         Просмотр сообщений арбитражного управляющего

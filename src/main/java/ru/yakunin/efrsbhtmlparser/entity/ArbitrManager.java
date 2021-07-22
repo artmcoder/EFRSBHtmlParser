@@ -15,7 +15,7 @@ public class ArbitrManager {
     private String regNumber;
     private String regDate;
     private String sro;
-    private Integer messagesQuantity;
+    private int messagesQuantity;
     @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST },
     mappedBy = "arbitrManager")
     private List<MessageTorgi> messageTorgis = new ArrayList<>();
@@ -94,8 +94,8 @@ public class ArbitrManager {
         this.sro = sro;
     }
 
-    public Integer getMessagesQuantity() {
-        return 0;
+    public int getMessagesQuantity() {
+        return messagesQuantity;
     }
 
     public void setMessagesQuantity(Integer messagesQuantity) {

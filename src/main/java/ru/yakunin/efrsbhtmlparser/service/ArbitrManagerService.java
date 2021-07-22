@@ -47,6 +47,7 @@ public class ArbitrManagerService {
                         "low-to-high");
                 break;
             default:
+                arbitrManagersFromDb.forEach(arbitrManager -> System.out.println(arbitrManager.getMessagesQuantity()));
                 return arbitrManagersFromDb;
         }
         return arbitrManagers;
