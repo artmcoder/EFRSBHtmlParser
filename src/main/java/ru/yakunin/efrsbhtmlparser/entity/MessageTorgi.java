@@ -40,15 +40,6 @@ public class MessageTorgi {
     private String detailsLink;
     private LocalDateTime dateOfCreated;
 
-    public static String makeStringToLowerCase(String word) {
-        String lowerString = "";
-        for (int i = 0; i < word.length(); i++) {
-            char c = word.charAt(i);
-            lowerString += Character.toLowerCase(c);
-        }
-        return lowerString;
-    }
-
     @PrePersist
     private void onCreate() {
         this.dateOfCreated = LocalDateTime.now();

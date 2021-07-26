@@ -7,9 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.yakunin.efrsbhtmlparser.entity.ArbitrManager;
-import ru.yakunin.efrsbhtmlparser.entity.Place;
 import ru.yakunin.efrsbhtmlparser.parser.ArbitrManagerParser;
-import ru.yakunin.efrsbhtmlparser.repository.PlaceRepository;
 import ru.yakunin.efrsbhtmlparser.service.ArbitrManagerService;
 
 import java.util.List;
@@ -20,9 +18,6 @@ public class ArbitrManagerController {
     private ArbitrManagerService arbitrManagerService;
     @Autowired
     private ArbitrManagerParser arbitrManagerParser;
-
-    @Autowired
-    private PlaceRepository placeRepository;
 
     @GetMapping("/")
     public String arbitrManagers(
@@ -43,8 +38,8 @@ public class ArbitrManagerController {
 
     @GetMapping("/parseArbitrManagers")
         public String arbitrManagerI() {
-            arbitrManagerParser.parserArbitrManagers(200, 210,
-                    210, 220);
+            arbitrManagerParser.parserArbitrManagers(1200, 1210,
+                    1210, 1220);
             return "Hello";
     }
 

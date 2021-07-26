@@ -11,7 +11,7 @@
                             id="region" class="form-select form-select-sm" style="width: 100%">
                         <option value="">Регион не выбран</option>
                         <#list regions as r>
-                            <option <#if region == r>selected</#if> value="${r}">${r} (обл., край)</option>
+                            <option <#if region == r>selected</#if> value="${r}">${r}</option>
                         </#list>
                     </select>
                 </div>

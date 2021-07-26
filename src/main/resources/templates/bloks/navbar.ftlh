@@ -10,14 +10,6 @@
             <li class="nav-item">
                 <a class="nav-link" href="/messages">Сообщения</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/main"></a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link" href="/user"></a>
-            </li>
         </ul>
-
     </div>
 </nav>
