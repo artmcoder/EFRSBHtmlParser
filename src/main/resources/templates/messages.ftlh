@@ -59,16 +59,16 @@
         </tr>
         <#list messages as msg>
             <tr>
-                <td>${msg.messageTorgiDetails.lotDescription}</td>
-                <td>${msg.messageTorgiDetails.lotClassification}</td>
-                <td>${msg.auctionType}</td>
-                <td>${msg.auctionStartDate}</td>
-                <td>${msg.auctionFinishedDate}</td>
-                <td>${msg.messageTorgiDetails.startPrice}</td>
-                <td>${msg.messageTorgiDetails.step}</td>
-                <td>${msg.messageTorgiDetails.deposit}</td>
-                <td>${msg.messageTorgiDetails.priceDecreasingInfo}</td>
-                <td>${msg.marketPlace}</td>
+                <td>${msg.lotDescription}</td>
+                <td>${msg.lotClassification}</td>
+                <td>${msg.messageTorgi.auctionType}</td>
+                <td>${msg.messageTorgi.auctionStartDate}</td>
+                <td>${msg.messageTorgi.auctionFinishedDate}</td>
+                <td>${msg.startPrice}</td>
+                <td>${msg.step}</td>
+                <td>${msg.deposit}</td>
+                <td>${msg.priceDecreasingInfo}</td>
+                <td>${msg.messageTorgi.marketPlace}</td>
                 <td>${msg.location?if_exists}</td>
                 <td>${msg.region}</td>
                 <td>${msg.town}</td>

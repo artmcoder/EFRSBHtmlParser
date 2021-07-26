@@ -4,18 +4,21 @@ import org.springframework.stereotype.Service;
 import ru.yakunin.efrsbhtmlparser.entity.ArbitrManager;
 import ru.yakunin.efrsbhtmlparser.entity.MessageTorgi;
 import ru.yakunin.efrsbhtmlparser.entity.MessageTorgiDetails;
+import ru.yakunin.efrsbhtmlparser.repository.MessageTorgiDetailsRepository;
 import ru.yakunin.efrsbhtmlparser.repository.MessageTorgiRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 @Service
 public class MessageTorgiService {
     private final MessageTorgiRepository messageTorgiRepository;
+    private final MessageTorgiDetailsRepository messageTorgiDetailsRepository;
 
-    public MessageTorgiService(MessageTorgiRepository messageTorgiRepository) {
+    public MessageTorgiService(MessageTorgiRepository messageTorgiRepository,
+                               MessageTorgiDetailsRepository messageTorgiDetailsRepository) {
         this.messageTorgiRepository = messageTorgiRepository;
+        this.messageTorgiDetailsRepository = messageTorgiDetailsRepository;
     }
 
     public static String makeStringToLowerCase(String word) {
@@ -49,25 +52,31 @@ public class MessageTorgiService {
 
     public List<MessageTorgiDetails> getAllMessageTorgiDetails(String searchByLotDesWord,
                                                                String town, String region) {
-        List<MessageTorgiDetails> origialMessageTories;
+        List<MessageTorgiDetails> origialMessageToriesDetails = null;
         if (searchByLotDesWord.equals("") && town.equals("") && region.equals(""))
-            origialMessageTories = messageTorgiRepository.findAll();
-        else origialMessageTories = searchByLotDes(searchByLotDesWord,
-                messageTorgiRepository.findAll());
+            origialMessageToriesDetails = messageTorgiDetailsRepository.findAll();
         if (!town.equals("")) {
-            origialMessageTories.removeIf(m -> !m.getTown().equals(town));
+            origialMessageToriesDetails.removeIf(m -> !m.getTown().equals(town));
         }
         if (!region.equals("")) {
-            origialMessageTories.removeIf(m -> !m.getRegion().equals(region));
+            origialMessageToriesDetails.removeIf(m -> !m.getRegion().equals(region));
+        }
+        if (!searchByLotDesWord.equals("")) {
+            origialMessageToriesDetails = searchByLotDes(searchByLotDesWord, messageTorgiDetailsRepository.findAll());
         }
 
-        List<MessageTorgi> messageTorgiList = new ArrayList<>();
-        for (MessageTorgi msgTr : origialMessageTories) {
-            MessageTorgiDetails msgTrDet = msgTr.getMessageTorgiDetails();
+        List<MessageTorgiDetails> messageTorgiDetailsList = new ArrayList<>();
+        for (MessageTorgiDetails msgTrDet : origialMessageToriesDetails) {
             char[] lotDesSym = msgTrDet.getLotDescription().toCharArray();
-            char[] priceDecInSym = msgTrDet.getPriceDecreasingInfo().toCharArray();
-            String lotDes = "";
+            char[] priceDecInSym = null;
             String priceDecInfo = "";
+            try {
+                priceDecInSym = msgTrDet.getPriceDecreasingInfo().toCharArray();
+            } catch (NullPointerException e) {
+                priceDecInfo = "-";
+            }
+            String lotDes = "";
+
             for (int i = 0; i < 107; i++) {
                 if (lotDesSym.length < 110) {
                     lotDes = msgTrDet.getLotDescription();
@@ -75,32 +84,31 @@ public class MessageTorgiService {
                 }
                 lotDes += lotDesSym[i];
             }
-
-            for (int i = 0; i < 107; i++) {
-                if (priceDecInSym.length < 110) {
-                    priceDecInfo = msgTrDet.getPriceDecreasingInfo();
-                    break;
+            if (!priceDecInfo.equals("-")) {
+                for (int i = 0; i < 107; i++) {
+                    if (priceDecInSym.length < 110) {
+                        priceDecInfo = msgTrDet.getPriceDecreasingInfo();
+                        break;
+                    }
+                    priceDecInfo += priceDecInSym[i];
                 }
-                priceDecInfo += priceDecInSym[i];
+                priceDecInfo += "...";
             }
             lotDes += "...";
-            priceDecInfo += "...";
             msgTrDet.setPriceDecreasingInfo(priceDecInfo);
             msgTrDet.setLotDescription(lotDes);
-            msgTr.setMessageTorgiDetails(msgTrDet);
-            messageTorgiList.add(msgTr);
+            messageTorgiDetailsList.add(msgTrDet);
         }
-        return messageTorgiList;
+        return messageTorgiDetailsList;
     }
 
-    private List<MessageTorgi> searchByLotDes(String searchByLotDesWord,
-                                              List<MessageTorgi> messageTorgis) {
-        List<MessageTorgi> searchedMessageTorgies = new ArrayList<>();
+    private List<MessageTorgiDetails> searchByLotDes(String searchByLotDesWord,
+                                              List<MessageTorgiDetails> messageTorgiDetails) {
+        List<MessageTorgiDetails> searchedMessageTorgiDetails = new ArrayList<>();
         String lowerSearchWord = makeStringToLowerCase(searchByLotDesWord);
         char[] searchWordToCharArray = lowerSearchWord.toCharArray();
-        for (int a = 0; a < messageTorgis.size(); a++) {
-            String lowerLotDec = makeStringToLowerCase(messageTorgis.get(a)
-                    .getMessageTorgiDetails().getLotDescription());
+        for (int a = 0; a < messageTorgiDetails.size(); a++) {
+            String lowerLotDec = messageTorgiDetails.get(a).getLotDescription();
             char[] chars = lowerLotDec.toCharArray();
             for (int i = 0; i < chars.length; i++) {
                 for (int j = 0; j < searchWordToCharArray.length; j++) {
@@ -109,8 +117,8 @@ public class MessageTorgiService {
                             if (chars[i + 1] == searchWordToCharArray[j + 1]) {
                                 if (chars[i + 2] == searchWordToCharArray[j + 2]) {
                                     if (chars[i + 3] == searchWordToCharArray[j + 3]) {
-                                        if (!searchedMessageTorgies.contains(messageTorgis.get(a))) {
-                                            searchedMessageTorgies.add(messageTorgis.get(a));
+                                        if (!searchedMessageTorgiDetails.contains(messageTorgiDetails.get(a))) {
+                                            searchedMessageTorgiDetails.add(messageTorgiDetails.get(a));
                                             break;
                                         }
                                     }
@@ -123,31 +131,31 @@ public class MessageTorgiService {
                 }
             }
         }
-        return searchedMessageTorgies;
+        return searchedMessageTorgiDetails;
     }
-
-    public List<MessageTorgi> getMessagesByArbitrManager(ArbitrManager arbitrManager) {
-        List<MessageTorgi> messageTorgiList = new ArrayList<>();
-        for (MessageTorgi msgTr : messageTorgiRepository.findAllByArbitrManager(arbitrManager)) {
-            MessageTorgiDetails msgTrDet = msgTr.getMessageTorgiDetails();
-            char[] lotDesSym = msgTrDet.getLotDescription().toCharArray();
-            char[] priceDecInSym = msgTrDet.getPriceDecreasingInfo().toCharArray();
-            String lotDes = "";
-            String priceDecInfo = "";
-            for (int i = 0; i < 107; i++) {
-                lotDes += lotDesSym[i];
-            }
-
-            for (int i = 0; i < 107; i++) {
-                priceDecInfo += priceDecInSym[i];
-            }
-            lotDes += "...";
-            priceDecInfo += "...";
-            msgTrDet.setPriceDecreasingInfo(priceDecInfo);
-            msgTrDet.setLotDescription(lotDes);
-            msgTr.setMessageTorgiDetails(msgTrDet);
-            messageTorgiList.add(msgTr);
-        }
-        return messageTorgiList;
-    }
+//
+//    public List<MessageTorgiDetails> getMessagesByArbitrManager(ArbitrManager arbitrManager) {
+//        List<MessageTorgiDetails> messageTorgiDetailsList = new ArrayList<>();
+//        for (MessageTorgiDetails msgTrDet : messageTorgiDetailsRepository.findAllByArbitrManager(arbitrManager)) {
+//            MessageTorgiDetails msgTrDet = msgTr.getMessageTorgiDetails();
+//            char[] lotDesSym = msgTrDet.getLotDescription().toCharArray();
+//            char[] priceDecInSym = msgTrDet.getPriceDecreasingInfo().toCharArray();
+//            String lotDes = "";
+//            String priceDecInfo = "";
+//            for (int i = 0; i < 107; i++) {
+//                lotDes += lotDesSym[i];
+//            }
+//
+//            for (int i = 0; i < 107; i++) {
+//                priceDecInfo += priceDecInSym[i];
+//            }
+//            lotDes += "...";
+//            priceDecInfo += "...";
+//            msgTrDet.setPriceDecreasingInfo(priceDecInfo);
+//            msgTrDet.setLotDescription(lotDes);
+//            msgTr.setMessageTorgiDetails(msgTrDet);
+//            messageTorgiDetailsList.add(msgTr);
+//        }
+//        return messageTorgiDetailsList;
+//    }
 }

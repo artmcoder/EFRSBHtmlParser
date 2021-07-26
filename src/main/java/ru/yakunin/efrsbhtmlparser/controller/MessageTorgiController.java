@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.yakunin.efrsbhtmlparser.entity.ArbitrManager;
 import ru.yakunin.efrsbhtmlparser.entity.MessageTorgi;
+import ru.yakunin.efrsbhtmlparser.entity.MessageTorgiDetails;
 import ru.yakunin.efrsbhtmlparser.service.MessageTorgiService;
 
 @Controller
@@ -27,20 +28,19 @@ public class MessageTorgiController {
         model.addAttribute("town", town);
         model.addAttribute("region", region);
         model.addAttribute("searchByLotDesWord", searchByLotDesWord);
-//        model.addAttribute("messages", messageTorgiService
-//                .getAll(searchByLotDesWord, town, region));
+        model.addAttribute("messages", messageTorgiService
+                .getAllMessageTorgiDetails(searchByLotDesWord, town, region));
         model.addAttribute("towns", ControllerUtils.getAllTowns());
         model.addAttribute("regions", ControllerUtils.getAllRegions());
-
         return "messages";
     }
 
     @GetMapping("/{id}")
-    public String messageInfo(@PathVariable("id") MessageTorgi messageTorgi,
+    public String messageInfo(@PathVariable("id") MessageTorgiDetails messageTorgiDetails,
                               Model model) {
-        model.addAttribute("msgTr", messageTorgi);
-        model.addAttribute("msgTrDet", messageTorgi.getMessageTorgiDetails());
-        model.addAttribute("mngId", messageTorgi.getArbitrManager().getId());
+        model.addAttribute("msgTr", messageTorgiDetails.getMessageTorgi());
+        model.addAttribute("msgTrDets", messageTorgiDetails.getMessageTorgi().getMessageTorgiDetails());
+        model.addAttribute("mngId", messageTorgiDetails.getMessageTorgi().getArbitrManager().getId());
         return "message-info";
     }
 
