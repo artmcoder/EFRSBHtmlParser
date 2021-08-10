@@ -1,6 +1,8 @@
 package ru.yakunin.efrsbhtmlparser.entity;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="messages_valuation")
@@ -8,6 +10,7 @@ public class MessageValuation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long numberOfMessage;
     private String dateOfPublication;
     private String debtorName;
     private String debtorAdres;
@@ -18,10 +21,18 @@ public class MessageValuation {
             fetch = FetchType.LAZY)
     @JoinColumn
     private ArbitrManager arbitrManager;
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "messageValuation")
+    private List<MessageValuationDetails> messageValuationDetails = new ArrayList<>();
     @Column(name = "SRO")
     private String sro;
     private String valuationReportNumber;
     private String valuationInfoText;
+    private String detailsLink;
+
+    public void addMessageValuationDetailsToMessageValuation(MessageValuationDetails messageValuationDetails) {
+        messageValuationDetails.setMessageValuation(this);
+        this.messageValuationDetails.add(messageValuationDetails);
+    }
 
     public Long getId() {
         return id;
@@ -41,6 +52,23 @@ public class MessageValuation {
 
     public String getDebtorName() {
         return debtorName;
+    }
+
+    @Override
+    public String toString() {
+        return "MessageValuation{" +
+                "numberOfMessage=" + numberOfMessage +
+                ", dateOfPublication='" + dateOfPublication + '\'' +
+                ", debtorName='" + debtorName + '\'' +
+                ", debtorAdres='" + debtorAdres + '\'' +
+                ", inn='" + inn + '\'' +
+                ", caseNumber='" + caseNumber + '\'' +
+                ", messageValuationDetails=" + messageValuationDetails +
+                ", sro='" + sro + '\'' +
+                ", valuationReportNumber='" + valuationReportNumber + '\'' +
+                ", valuationInfoText='" + valuationInfoText + '\'' +
+                ", detailsLink='" + detailsLink + '\'' +
+                '}';
     }
 
     public void setDebtorName(String debtorName) {
@@ -102,4 +130,21 @@ public class MessageValuation {
     public void setValuationInfoText(String valuationInfoText) {
         this.valuationInfoText = valuationInfoText;
     }
+
+    public String getDetailsLink() {
+        return detailsLink;
+    }
+
+    public void setDetailsLink(String detailsLink) {
+        this.detailsLink = detailsLink;
+    }
+
+    public Long getNumberOfMessage() {
+        return numberOfMessage;
+    }
+
+    public void setNumberOfMessage(Long numberOfMessage) {
+        this.numberOfMessage = numberOfMessage;
+    }
+
 }

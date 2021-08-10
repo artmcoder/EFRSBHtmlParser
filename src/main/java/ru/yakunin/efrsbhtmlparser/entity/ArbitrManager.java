@@ -19,6 +19,9 @@ public class ArbitrManager {
     @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST },
     mappedBy = "arbitrManager")
     private List<MessageTorgi> messageTorgis = new ArrayList<>();
+    @OneToMany(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST },
+            mappedBy = "arbitrManager")
+    private List<MessageValuation> messageValuations = new ArrayList<>();
     private String arbitrManagersDetailsLink;
 
     public ArbitrManager() {
@@ -36,6 +39,11 @@ public class ArbitrManager {
     public void addMessageTorgiToArbitrManager(MessageTorgi messageTorgi) {
         messageTorgi.setArbitrManager(this);
         messageTorgis.add(messageTorgi);
+    }
+
+    public void addMessageValuationToArbitrManager(MessageValuation messageValuation) {
+        messageValuation.setArbitrManager(this);
+        messageValuations.add(messageValuation);
     }
 
     public String getArbitrManagersDetailsLink() {
@@ -113,6 +121,7 @@ public class ArbitrManager {
                 ", sro='" + sro + '\'' +
                 ", messagesQuantity=" + messagesQuantity +
                 ", messageTorgis=" + messageTorgis +
+                ", messageValuations=" + messageValuations +
                 ", arbitrManagersDetailsLink='" + arbitrManagersDetailsLink + '\'' +
                 '}';
     }

@@ -6,9 +6,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.yakunin.efrsbhtmlparser.entity.ArbitrManager;
-import ru.yakunin.efrsbhtmlparser.entity.MessageTorgi;
-import ru.yakunin.efrsbhtmlparser.entity.MessageTorgiDetails;
+import ru.yakunin.efrsbhtmlparser.entity.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,6 +15,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ArbitrManagerParserThread extends Thread {
+    private static final String FIND_TABLE_IN_VALUATION_MESSAGE = "Тип Описание Дата определения стоимости Стоимость, определенная оценщиком Балансовая стоимость";
+    private static final String VALUATION_REPORT_NUMBER = "Отчет об оценке";
     private static final String MARKET_PLACE = "Место проведения:";
     private static final String PRICE_OFFER_FORM = "Форма подачи предложения о цене:";
     private static final String DATE_TIME_AUCTION = "Дата и время торгов:";
@@ -380,6 +380,171 @@ public class ArbitrManagerParserThread extends Thread {
                     case MESSAGE_INVENTORY_TEXT:
                         break;
                     case MESSAGE_VALUATION_TEXT:
+                        MessageValuation messageValuation = new MessageValuation();
+                        messageValuation.setDetailsLink(ORIGINAL_PARSE_URL + getPayloadFromLazyLoad(element.attr("onclick")));
+                        String messageValuationDetailsParseUrl = messageValuation.getDetailsLink();
+                        Document messageValuationDetailsDoc = null;
+                        try {
+                            messageValuationDetailsDoc = Jsoup.connect(messageValuationDetailsParseUrl)
+                                    .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; ru-RU; " +
+                                            "rv1.8.1.6) Gecko/20070725" +
+                                            " Firefox/2.0.0.6")
+                                    .post();
+                            log.info("Arbitr manager name: {}. Connect to: {}. To parse arbitr" +
+                                            " manager torgi message details",
+                                    arbitrManager.getFullName(), messageValuationDetailsParseUrl);
+                        } catch (IOException e) {
+                            log.error("Error connect to {}. Exception: {}. This html page have" +
+                                            " arbitr manager torgi message details. Arbitr manager name: {}",
+                                    messageValuationDetailsParseUrl, e, arbitrManager.getFullName());
+                        }
+                        Element numberOfMessageValuation = messageValuationDetailsDoc
+                                .getElementsByAttributeValue("class", "even").first().child(1);
+                        try {
+                            messageValuation.setNumberOfMessage(Long.parseLong(numberOfMessageValuation.text()));
+                        } catch (NumberFormatException e) {
+                            log.info("Cannot to parse number of message long: {}", numberOfMessageValuation.text());
+                        }
+                        Element dateOfPublicationMessageValuation = messageValuationDetailsDoc
+                                .getElementsByAttributeValue("class", "odd").first().child(1);
+                        Pattern pattern1 = Pattern.compile("\\d{2}.\\d{2}.\\d{4}");
+                        Matcher matcher1 = pattern1.matcher(dateOfPublicationMessageValuation.text());
+                        if (matcher1.matches()) {
+                            messageValuation.setDateOfPublication(dateOfPublicationMessageValuation.text());
+                        } else {
+                            log.error("Date of publication string {}. Don't look at pattern",
+                                    dateOfPublicationMessageValuation.text());
+                        }
+                        Elements valuationInfoTextElements = messageValuationDetailsDoc
+                                .getElementsByAttributeValue("class", "msg");
+                        for (Element publicationTextEl : valuationInfoTextElements) {
+                            String valuationInfoText = publicationTextEl.text();
+                            String[] valuationInfoTextWithoutDoublePoints = valuationInfoText.split(":");
+                            if (valuationInfoTextWithoutDoublePoints[0].equals("Текст")) {
+                                messageValuation.setValuationInfoText(valuationInfoText);
+                            }
+                        }
+                        String valuatioDebtorName = "";
+                        String valuationInn = "";
+                        String valuationDebtorAdres = "";
+                        String valuationCaseNumber = "";
+                        String valuationReportNumber = "";
+                        Elements evenElementsByValuation = messageValuationDetailsDoc.getElementsByAttributeValue("class", "even");
+                        Elements oddElementsByValuation = messageValuationDetailsDoc.getElementsByAttributeValue("class", "odd");
+                        for (Element evenElement : evenElementsByValuation) {
+                            String evenElementText = evenElement.text();
+                            if (evenElementText.contains(DEBTOR_FULL_NAME) | evenElementText.contains(DEBTOR_NAME)) {
+                                if (evenElementText.contains(DEBTOR_FULL_NAME)) {
+                                    for (int j = 1; j < evenElementText.replace(DEBTOR_FULL_NAME, "").toCharArray().length; j++) {
+                                        valuatioDebtorName += evenElementText.replace(DEBTOR_FULL_NAME, "").toCharArray()[j];
+                                    }
+                                } else if (evenElementText.contains(DEBTOR_NAME)) {
+                                    for (int j = 1; j < evenElementText.replace(DEBTOR_NAME, "").toCharArray().length; j++) {
+                                        valuatioDebtorName += evenElementText.replace(DEBTOR_NAME, "").toCharArray()[j];
+                                    }
+                                }
+                            } else if (evenElementText.contains(INN)) {
+                                if (evenElementText.split(" ")[0].equals(INN)) {
+                                    for (int j = 1; j < evenElementText.replace(INN, "").toCharArray().length; j++) {
+                                        valuationInn += evenElementText.replace(INN, "").toCharArray()[j];
+                                    }
+                                }
+                            } else if ((evenElementText.contains(DEBTOR_LEGAL_ADRES) | evenElementText.contains(DEBTOR_PERSON_ADRES))) {
+                                if (!evenElementText.contains(DEBTOR_ADRES_SRO_AY) && !evenElementText.contains(ADRES_FOR_KORESPONDATION)) {
+                                    if (evenElementText.contains(DEBTOR_LEGAL_ADRES)) {
+                                        for (int j = 1; j < evenElementText.replace(DEBTOR_LEGAL_ADRES, "")
+                                                .toCharArray().length; j++) {
+                                            valuationDebtorAdres += evenElementText.replace(DEBTOR_LEGAL_ADRES, "").toCharArray()[j];
+                                        }
+                                    } else if (evenElementText.contains(DEBTOR_PERSON_ADRES)) {
+                                        for (int j = 1; j < evenElementText.replace(DEBTOR_PERSON_ADRES, "")
+                                                .toCharArray().length; j++) {
+                                            valuationDebtorAdres += evenElementText.replace(DEBTOR_PERSON_ADRES, "").toCharArray()[j];
+                                        }
+                                    }
+                                }
+                            } else if (evenElementText.contains(CASE_NUMBER)) {
+
+                                for (int j = 1; j < evenElementText.replace(CASE_NUMBER, "").toCharArray().length; j++) {
+                                    valuationCaseNumber += evenElementText.replace(CASE_NUMBER, "").toCharArray()[j];
+                                }
+                            } else if (evenElementText.contains(VALUATION_REPORT_NUMBER)) {
+                                for (int j = 1; j < evenElementText.replace(VALUATION_REPORT_NUMBER, "").toCharArray().length; j++) {
+                                    valuationReportNumber += evenElementText.replace(VALUATION_REPORT_NUMBER, "").toCharArray()[j];
+                                }
+                            }
+                        }
+
+                        for (Element oddElement : oddElementsByValuation) {
+                            String oddElementText = oddElement.text();
+                            if (oddElementText.contains(DEBTOR_FULL_NAME) | oddElementText.contains(DEBTOR_NAME)) {
+                                if (oddElementText.contains(DEBTOR_FULL_NAME)) {
+                                    for (int j = 1; j < oddElementText.replace(DEBTOR_FULL_NAME, "").toCharArray().length; j++) {
+                                        valuatioDebtorName += oddElementText.replace(DEBTOR_FULL_NAME, "").toCharArray()[j];
+                                    }
+                                } else if (oddElementText.contains(DEBTOR_NAME)) {
+                                    for (int j = 1; j < oddElementText.replace(DEBTOR_NAME, "").toCharArray().length; j++) {
+                                        valuatioDebtorName += oddElementText.replace(DEBTOR_NAME, "").toCharArray()[j];
+                                    }
+                                }
+                            } else if (oddElementText.contains(INN)) {
+                                if (oddElementText.split(" ")[0].equals(INN)) {
+                                    for (int j = 1; j < oddElementText.replace(INN, "").toCharArray().length; j++) {
+                                        valuationInn += oddElementText.replace(INN, "").toCharArray()[j];
+                                    }
+                                }
+                            } else if ((oddElementText.contains(DEBTOR_LEGAL_ADRES) | oddElementText.contains(DEBTOR_PERSON_ADRES))) {
+                                if (!oddElementText.contains(DEBTOR_ADRES_SRO_AY) && !oddElementText.contains(ADRES_FOR_KORESPONDATION)) {
+                                    if (oddElementText.contains(DEBTOR_LEGAL_ADRES)) {
+                                        for (int j = 1; j < oddElementText.replace(DEBTOR_LEGAL_ADRES, "")
+                                                .toCharArray().length; j++) {
+                                            valuationDebtorAdres += oddElementText.replace(DEBTOR_LEGAL_ADRES, "").toCharArray()[j];
+                                        }
+                                    } else if (oddElementText.contains(DEBTOR_PERSON_ADRES)) {
+                                        for (int j = 1; j < oddElementText.replace(DEBTOR_PERSON_ADRES, "")
+                                                .toCharArray().length; j++) {
+                                            valuationDebtorAdres += oddElementText.replace(DEBTOR_PERSON_ADRES, "").toCharArray()[j];
+                                        }
+                                    }
+                                }
+                            } else if (oddElementText.contains(CASE_NUMBER)) {
+                                for (int j = 1; j < oddElementText.replace(CASE_NUMBER, "").toCharArray().length; j++) {
+                                    valuationCaseNumber += oddElementText.replace(CASE_NUMBER, "").toCharArray()[j];
+                                }
+                            } else if (oddElementText.contains(VALUATION_REPORT_NUMBER)) {
+                                for (int j = 1; j < oddElementText.replace(VALUATION_REPORT_NUMBER, "").toCharArray().length; j++) {
+                                    valuationReportNumber += oddElementText.replace(VALUATION_REPORT_NUMBER, "").toCharArray()[j];
+                                }
+                            }
+                        }
+                        messageValuation.setValuationReportNumber(valuationReportNumber);
+                        messageValuation.setSro(arbitrManager.getSro());
+                        messageValuation.setCaseNumber(valuationCaseNumber);
+                        messageValuation.setDebtorAdres(valuationDebtorAdres);
+                        messageValuation.setInn(valuationInn);
+                        messageValuation.setDebtorName(valuatioDebtorName);
+
+                        Element table = null;
+                        Elements tableElements = messageValuationDetailsDoc.getElementsByAttributeValue("class", "personInfo");
+                        for (Element t : tableElements) {
+                            if (t.text().contains(FIND_TABLE_IN_VALUATION_MESSAGE)) {
+                                table = t;
+                            }
+                        }
+                        Elements rowsValuationTable = table.select("tr");
+
+                        for (int j = 1; j < rowsValuationTable.size(); j++) {
+                            MessageValuationDetails messageValuationDetails = new MessageValuationDetails();
+                            Element row = rowsValuationTable.get(j);
+                            Elements cols = row.select("td");
+                            messageValuationDetails.setPropertyType(cols.get(0).text());
+                            messageValuationDetails.setPropertyDescription(cols.get(1).text());
+                            messageValuationDetails.setValuationDate(cols.get(2).text());
+                            messageValuationDetails.setCost(cols.get(3).text());
+                            messageValuationDetails.setBalanceCost(cols.get(4).text());
+                            messageValuation.addMessageValuationDetailsToMessageValuation(messageValuationDetails);
+                        }
+                        arbitrManager.addMessageValuationToArbitrManager(messageValuation);
                         break;
                     case MESSAGE_PROCEDURE_TEXT:
                         break;

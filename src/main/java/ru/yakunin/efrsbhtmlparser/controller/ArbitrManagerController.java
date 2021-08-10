@@ -38,8 +38,8 @@ public class ArbitrManagerController {
 
     @GetMapping("/parseArbitrManagers")
         public String arbitrManagerI() {
-            arbitrManagerParser.parserArbitrManagers(1200, 1210,
-                    1210, 1220);
+            arbitrManagerParser.parserArbitrManagers(12300, 12315,
+                    12315, 12330);
             return "Hello";
     }
 

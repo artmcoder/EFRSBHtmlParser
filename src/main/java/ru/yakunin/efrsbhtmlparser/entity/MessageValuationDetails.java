@@ -13,6 +13,9 @@ public class MessageValuationDetails {
     private String valuationDate;
     private String cost;
     private String balanceCost;
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn
+    private MessageValuation messageValuation;
 
     public Long getId() {
         return id;
@@ -60,6 +63,25 @@ public class MessageValuationDetails {
 
     public void setBalanceCost(String balanceCost) {
         this.balanceCost = balanceCost;
+    }
+
+    public MessageValuation getMessageValuation() {
+        return messageValuation;
+    }
+
+    public void setMessageValuation(MessageValuation messageValuation) {
+        this.messageValuation = messageValuation;
+    }
+
+    @Override
+    public String toString() {
+        return "MessageValuationDetails{" +
+                "propertyType='" + propertyType + '\'' +
+                ", propertyDescription='" + propertyDescription + '\'' +
+                ", valuationDate='" + valuationDate + '\'' +
+                ", cost='" + cost + '\'' +
+                ", balanceCost='" + balanceCost + '\'' +
+                '}';
     }
 
     //here we need the method of downloading attached files in pdf, word formats

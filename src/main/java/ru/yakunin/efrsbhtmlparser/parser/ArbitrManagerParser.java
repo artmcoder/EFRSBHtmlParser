@@ -35,6 +35,7 @@ public class ArbitrManagerParser {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        arbitrManagerRepository.saveAll(arbitrManagers);
+        arbitrManagers.forEach(System.out::println);
+//        arbitrManagerRepository.saveAll(arbitrManagers);
     }
 }
